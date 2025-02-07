@@ -27,7 +27,7 @@
                     <button @click="addCard(1)">Добавить карточку</button>
                 </div>
             </div>
-            <div class="column": class="{ disabled: isColumnBlocked(1) }">
+            <div class="column">
                 <h2>Колонка 2</h2>
                 <div v-for="card in columns[1]" :key="card.id" class="card">
                     <h3>{{ card title }}</h3>
@@ -39,10 +39,13 @@
                     </ul>
                 </div>
             </div>
-            
-
-
-
+            <div class="column">
+                <h2>Колонка 3</h2>
+                <div v-for="card in columns[2]" :key="card.id" class="card">
+                    <h3>{{ card title }}</h3>
+                    <p><strong>Завершено:</strong>{{ card.completedAt }}</p>
+                </div>
+            </div>
         </div>
     </div>
 </body>
