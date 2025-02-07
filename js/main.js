@@ -47,5 +47,12 @@ new Vue({
         }
         this.saveData();
     },
+    moveCard(card, toColumn, fromColumn) {
+        this.columns[fromColumn].splice(this.columns[fromColumn].indexOf(card), 1);
+        this.columns[toColumn].push(card);
+    },
+    isColumnBlocked(columnIndex) {
+        return columnIndex === 1 && this.columns[1].length >= 5;
+    },
     
 }
