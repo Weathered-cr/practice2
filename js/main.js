@@ -33,5 +33,19 @@ new Vue({
             alert('Карточка должна содержать от 3 до 5 пунктов.');
         }
     },
+    updateProgress(card) {
+        const total = card.items.length;
+        const completed = card.items.filter(item => item.completed).length;
+        const progress = completed/total;
 
+        if(progress>0.5 && this.columns[0].includes(card)) {
+            this.moveCard(card, 1, 0);
+        }
+        if (progress === 1 && this.columns[1].includes(card)) {
+            this.moveCard(card, 2, 1);
+            card.completedAt = new Date().toLocaleString();
+        }
+        this.saveData();
+    },
+    
 }
