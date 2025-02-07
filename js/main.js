@@ -2,9 +2,9 @@ new Vue({
     el: '#app',
     data: {
         columns: [
-            [],//Первая колонка
-            [],//Вторая
-            []//Третья
+            [], // Первая колонка
+            [], // Вторая 
+            []  // Третья 
         ]
     },
     methods: {
@@ -21,38 +21,59 @@ new Vue({
                 items.push({ text, completed: false });
                 itemCount++;
             }
+
             if (items.length >= 3) {
                 this.columns[columnIndex - 1].push({
                     id: Math.random().toString(36).substr(2, 9),
                     title,
                     items,
                     completedAt: null
-            });
-            this.saveData();
-        }else{
-            alert('Карточка должна содержать от 3 до 5 пунктов.');
-        }
-    },
-    updateProgress(card) {
-        const total = card.items.length;
-        const completed = card.items.filter(item => item.completed).length;
-        const progress = completed/total;
+                });
+                this.saveData();
+            } else {
+                alert('Карточка должна содержать от 3 до 5 пунктов.');
+            }
+        },
 
-        if(progress>0.5 && this.columns[0].includes(card)) {
-            this.moveCard(card, 1, 0);
+        updateProgress(card) {
+            const total = card.items.length;
+            const completed = card.items.filter(item => item.completed).length;
+            const progress = completed / total;
+
+            if (progress > 0.5 && this.columns[0].includes(card)) {
+                this.moveCard(card, 1, 0);
+            }
+
+            if (progress === 1 && this.columns[1].includes(card)) {
+                this.moveCard(card, 2, 1);
+                card.completedAt = new Date().toLocaleString();
+            }
+
+            this.saveData();
+        },
+
+        moveCard(card, toColumn, fromColumn) {
+            this.columns[fromColumn].splice(this.columns[fromColumn].indexOf(card), 1);
+            this.columns[toColumn].push(card);
+        },
+
+        isColumnBlocked(columnIndex) {
+            return columnIndex === 1 && this.columns[1].length >= 5;
+        },
+
+        saveData() {
+            localStorage.setItem('notesAppData', JSON.stringify(this.columns));
+        },
+
+        loadData() {
+            const data = localStorage.getItem('notesAppData');
+            if (data) {
+                this.columns = JSON.parse(data);
+            }
         }
-        if (progress === 1 && this.columns[1].includes(card)) {
-            this.moveCard(card, 2, 1);
-            card.completedAt = new Date().toLocaleString();
-        }
-        this.saveData();
     },
-    moveCard(card, toColumn, fromColumn) {
-        this.columns[fromColumn].splice(this.columns[fromColumn].indexOf(card), 1);
-        this.columns[toColumn].push(card);
-    },
-    isColumnBlocked(columnIndex) {
-        return columnIndex === 1 && this.columns[1].length >= 5;
-    },
-    
-}
+
+    mounted() {
+        this.loadData();
+    }
+});
