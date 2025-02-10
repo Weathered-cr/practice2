@@ -3,12 +3,18 @@ new Vue({
     data: {
         columns: [
             [], // Первая колонка
-            [], // Вторая 
+            [], // Вторая
             []  // Третья 
-        ]
+        ],
+        isFirstColumnLocked: false 
     },
     methods: {
         addCard(columnIndex) {
+            if (this.isFirstColumnLocked && columnIndex === 1) {
+                alert('Первый столбец заблокирован для редактирования.');
+                return;
+            }
+
             const title = prompt('Введите название карточки:');
             if (!title) return;
 
@@ -41,12 +47,29 @@ new Vue({
             const progress = completed / total;
 
             if (progress > 0.5 && this.columns[0].includes(card)) {
-                this.moveCard(card, 1, 0);
+                if (this.columns[1].length >= 5) {
+                    this.isFirstColumnLocked = true;
+                } else {
+                    this.moveCard(card, 1, 0);
+                }
             }
 
             if (progress === 1 && this.columns[1].includes(card)) {
                 this.moveCard(card, 2, 1);
                 card.completedAt = new Date().toLocaleString();
+
+                
+                if (this.columns[1].length < 5) {
+                    this.isFirstColumnLocked = false;
+                }
+            }
+
+            if (progress < 0.5 && this.columns[1].includes(card)) {
+                this.moveCard(card, 0, 1);
+
+                if (this.columns[1].length < 5) {
+                    this.isFirstColumnLocked = false;
+                }
             }
 
             this.saveData();
@@ -55,6 +78,7 @@ new Vue({
         moveCard(card, toColumn, fromColumn) {
             this.columns[fromColumn].splice(this.columns[fromColumn].indexOf(card), 1);
             this.columns[toColumn].push(card);
+            this.saveData();
         },
 
         isColumnBlocked(columnIndex) {
@@ -62,13 +86,29 @@ new Vue({
         },
 
         saveData() {
-            localStorage.setItem('notesAppData', JSON.stringify(this.columns));
+            try {
+                const dataToSave = {
+                    columns: this.columns,
+                    isFirstColumnLocked: this.isFirstColumnLocked
+                };
+                localStorage.setItem('notesAppData', JSON.stringify(dataToSave));
+            } catch (error) {
+                console.error('Ошибка при сохранении данных:', error);
+            }
         },
 
         loadData() {
-            const data = localStorage.getItem('notesAppData');
-            if (data) {
-                this.columns = JSON.parse(data);
+            try {
+                const data = localStorage.getItem('notesAppData');
+                if (data) {
+                    const parsedData = JSON.parse(data);
+                    this.columns = parsedData.columns;
+                    this.isFirstColumnLocked = parsedData.isFirstColumnLocked;
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error);
+                this.columns = [[], [], []]; 
+                this.isFirstColumnLocked = false;
             }
         }
     },
